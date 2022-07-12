@@ -2,7 +2,13 @@ package answer
 
 import (
 	"context"
+	"errors"
 	"fmt"
+)
+
+var (
+	ErrFetchingAnswer = errors.New("failed to fetch answer by id")
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 type Answer struct {
@@ -30,7 +36,19 @@ func (s *Service) GetAnswer(ctx context.Context, id string) (Answer, error) {
 	answer, err := s.Store.GetAnswer(ctx, id)
 	if err != nil {
 		fmt.Println(err)
-		return Answer{}, err
+		return Answer{}, ErrFetchingAnswer
 	}
 	return answer, nil
+}
+
+func (s *Service) UpdateAnswer(ctx context.Context, answer Answer) error {
+	return ErrNotImplemented
+}
+
+func (s *Service) DeleteAnswer(ctx context.Context, id string) error {
+	return ErrNotImplemented
+}
+
+func (s *Service) CreateAnswer(ctx context.Context, answer Answer) (Answer, error) {
+	return Answer{}, ErrNotImplemented
 }
