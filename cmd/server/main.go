@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/spayder/answers-rest-api/internal/answer"
 	"github.com/spayder/answers-rest-api/internal/db"
 )
 
@@ -20,6 +22,13 @@ func Run() error {
 	}
 
 	fmt.Println("successfully connected and pinged to the database")
+
+	answerService := answer.NewService(db)
+	fmt.Println(answerService.GetAnswer(
+		context.Background(),
+		"7210a7da-0372-11ed-b939-0242ac120002",
+	))
+
 	return nil
 }
 

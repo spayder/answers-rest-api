@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -28,7 +29,9 @@ func (d *Database) Migrate() error {
 	}
 
 	if err := m.Up(); err != nil {
-		return fmt.Errorf("could not migrate the database: %w", err)
+		if !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("could not migrate the database: %w", err)
+		}
 	}
 
 	fmt.Println("successfully migrated the database")
