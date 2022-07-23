@@ -63,6 +63,30 @@ func (d *Database) PostAnswer(ctx context.Context, ans answer.Answer) (answer.An
 	return ans, nil
 }
 
+func (d *Database) UpdateAnswer(ctx context.Context, uuid string, ans answer.Answer) (answer.Answer, error) {
+	ansRow := AnswerRow{
+		ID:    uuid,
+		Key:   sql.NullString{String: ans.Key, Valid: true},
+		Value: sql.NullString{String: ans.Value, Valid: true},
+	}
+
+	rows, err := d.Client.NamedQueryContext(
+		ctx,
+		`UPDATE answers SET value = :value, key = :key WHERE id = :id`,
+		ansRow,
+	)
+
+	if err != nil {
+		return answer.Answer{}, fmt.Errorf("could not update answer: %w", err)
+	}
+
+	if err = rows.Close(); err != nil {
+		return answer.Answer{}, fmt.Errorf("failed to close rows: %w", err)
+	}
+
+	return convertAnswerRowToAnswer(ansRow), nil
+}
+
 func (d *Database) DeleteAnswer(ctx context.Context, uuid string) error {
 	_, err := d.Client.ExecContext(
 		ctx,
