@@ -62,3 +62,17 @@ func (d *Database) PostAnswer(ctx context.Context, ans answer.Answer) (answer.An
 
 	return ans, nil
 }
+
+func (d *Database) DeleteAnswer(ctx context.Context, uuid string) error {
+	_, err := d.Client.ExecContext(
+		ctx,
+		`DELETE FROM answers WHERE id = $1`,
+		uuid,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to delete answer: %w", err)
+	}
+
+	return nil
+}
