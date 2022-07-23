@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrFetchingAnswer = errors.New("failed to fetch answer by id")
+	ErrPostingAnswer  = errors.New("failed to post answer")
 	ErrNotImplemented = errors.New("not implemented")
 )
 
@@ -19,6 +20,7 @@ type Answer struct {
 
 type Store interface {
 	GetAnswer(ctx context.Context, id string) (Answer, error)
+	PostAnswer(ctx context.Context, ans Answer) (Answer, error)
 }
 
 type Service struct {
@@ -49,6 +51,13 @@ func (s *Service) DeleteAnswer(ctx context.Context, id string) error {
 	return ErrNotImplemented
 }
 
-func (s *Service) CreateAnswer(ctx context.Context, answer Answer) (Answer, error) {
-	return Answer{}, ErrNotImplemented
+func (s *Service) PostAnswer(ctx context.Context, answer Answer) (Answer, error) {
+	insertedAnswer, err := s.Store.PostAnswer(ctx, answer)
+
+	if err != nil {
+		fmt.Println(err)
+		return Answer{}, ErrPostingAnswer
+	}
+
+	return insertedAnswer, nil
 }

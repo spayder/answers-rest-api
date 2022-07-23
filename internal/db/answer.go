@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/satori/go.uuid"
 	"github.com/spayder/answers-rest-api/internal/answer"
 )
 
@@ -35,4 +36,29 @@ func (d *Database) GetAnswer(ctx context.Context, uuid string) (answer.Answer, e
 	}
 
 	return convertAnswerRowToAnswer(ansRow), nil
+}
+
+func (d *Database) PostAnswer(ctx context.Context, ans answer.Answer) (answer.Answer, error) {
+	ans.ID = uuid.NewV4().String()
+	postRow := AnswerRow{
+		ID:    ans.ID,
+		Key:   sql.NullString{String: ans.Key, Valid: true},
+		Value: sql.NullString{String: ans.Value, Valid: true},
+	}
+
+	rows, err := d.Client.NamedQueryContext(
+		ctx,
+		`INSERT INTO answers (id, key, value) VALUES (:id, :key, :value)`,
+		postRow,
+	)
+
+	if err != nil {
+		return answer.Answer{}, fmt.Errorf("could not insert the answer to the database: %w", err)
+	}
+
+	if err = rows.Close(); err != nil {
+		return answer.Answer{}, fmt.Errorf("failed to close rows: %w", err)
+	}
+
+	return ans, nil
 }

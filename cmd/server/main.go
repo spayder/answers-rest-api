@@ -24,6 +24,14 @@ func Run() error {
 	fmt.Println("successfully connected and pinged to the database")
 
 	answerService := answer.NewService(db)
+
+	answerService.PostAnswer(
+		context.Background(),
+		answer.Answer{
+			Key:   "manual-test",
+			Value: "manual value data",
+		},
+	)
 	fmt.Println(answerService.GetAnswer(
 		context.Background(),
 		"7210a7da-0372-11ed-b939-0242ac120002",

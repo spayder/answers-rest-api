@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/satori/go.uuid v1.2.0
 )
 
 require (
