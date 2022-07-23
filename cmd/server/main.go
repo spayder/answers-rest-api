@@ -1,10 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/spayder/answers-rest-api/internal/answer"
 	"github.com/spayder/answers-rest-api/internal/db"
+	transportHttp "github.com/spayder/answers-rest-api/internal/transport/http"
 )
 
 func Run() error {
@@ -24,19 +24,11 @@ func Run() error {
 	fmt.Println("successfully connected and pinged to the database")
 
 	answerService := answer.NewService(db)
-
-	answerService.PostAnswer(
-		context.Background(),
-		answer.Answer{
-			Key:   "manual-test",
-			Value: "manual value data",
-		},
-	)
-	fmt.Println(answerService.GetAnswer(
-		context.Background(),
-		"7210a7da-0372-11ed-b939-0242ac120002",
-	))
-
+	httpHandler := transportHttp.NewHandler(answerService)
+	if err := httpHandler.Serve(); err != nil {
+		fmt.Println("failed starting the handler")
+		return err
+	}
 	return nil
 }
 
