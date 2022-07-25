@@ -11,9 +11,6 @@ import (
 	"time"
 )
 
-type AnswerService interface {
-}
-
 type Handler struct {
 	Router  *mux.Router
 	Service AnswerService
@@ -39,6 +36,12 @@ func (h *Handler) mapRoutes() {
 	h.Router.HandleFunc("/hello", func(writer http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(writer, "hello")
 	})
+
+	h.Router.HandleFunc("/api/answers", h.GetAnswers).Methods("GET")
+	h.Router.HandleFunc("/api/answers", h.PostAnswer).Methods("POST")
+	h.Router.HandleFunc("/api/answers/{id}", h.GetAnswer).Methods("GET")
+	h.Router.HandleFunc("/api/answers/{id}", h.UpdateAnswer).Methods("PUT")
+	h.Router.HandleFunc("/api/answers/{id}", h.DeleteAnswer).Methods("DELETE")
 }
 
 func (h *Handler) Serve() error {
