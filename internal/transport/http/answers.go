@@ -54,7 +54,28 @@ func (h *Handler) GetAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateAnswer(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	var ans answer.Answer
+	if err := json.NewDecoder(r.Body).Decode(&ans); err != nil {
+		return
+	}
+
+	updatedAns, err := h.Service.UpdateAnswer(r.Context(), id, ans)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(updatedAns); err != nil {
+		log.Print(err)
+		panic(err)
+	}
 }
 
 func (h *Handler) DeleteAnswer(w http.ResponseWriter, r *http.Request) {
