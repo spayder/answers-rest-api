@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/spayder/answers-rest-api/internal/answer"
 	"log"
 	"net/http"
@@ -33,7 +34,23 @@ func (h *Handler) PostAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAnswer(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	ans, err := h.Service.GetAnswer(r.Context(), id)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(ans); err != nil {
+		log.Print(err)
+		panic(err)
+	}
 }
 
 func (h *Handler) UpdateAnswer(w http.ResponseWriter, r *http.Request) {
