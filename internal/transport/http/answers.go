@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+type Response struct {
+	Message string
+}
+
 type AnswerService interface {
 	PostAnswer(context.Context, answer.Answer) (answer.Answer, error)
 	GetAnswer(context.Context, string) (answer.Answer, error)
@@ -79,5 +83,21 @@ func (h *Handler) UpdateAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteAnswer(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
+	err := h.Service.DeleteAnswer(r.Context(), id)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(Response{Message: "Successfully deleted"}); err != nil {
+		log.Print(err)
+		panic(err)
+	}
 }
