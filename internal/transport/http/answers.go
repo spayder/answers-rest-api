@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/spayder/answers-rest-api/internal/answer"
 	"log"
@@ -20,19 +21,40 @@ type AnswerService interface {
 	DeleteAnswer(context.Context, string) error
 }
 
+type PostAnswerRequest struct {
+	Key   string `json:"key" validate:"required"`
+	Value string `json:"value" validate:"required"`
+}
+
+func ConvertPostAnswerRequestToAnswer(a PostAnswerRequest) answer.Answer {
+	return answer.Answer{
+		Key:   a.Key,
+		Value: a.Value,
+	}
+}
+
 func (h *Handler) PostAnswer(w http.ResponseWriter, r *http.Request) {
-	var ans answer.Answer
+	var ans PostAnswerRequest
 	if err := json.NewDecoder(r.Body).Decode(&ans); err != nil {
 		return
 	}
 
-	ans, err := h.Service.PostAnswer(r.Context(), ans)
+	validate := validator.New()
+	err := validate.Struct(ans)
+	if err != nil {
+		http.Error(w, "not a valid answer", http.StatusBadRequest)
+		return
+	}
+
+	convertedAnswer := ConvertPostAnswerRequestToAnswer(ans)
+
+	postedAnswer, err := h.Service.PostAnswer(r.Context(), convertedAnswer)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(ans); err != nil {
+	if err := json.NewEncoder(w).Encode(postedAnswer); err != nil {
 		panic(err)
 	}
 }

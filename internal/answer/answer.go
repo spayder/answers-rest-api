@@ -13,9 +13,9 @@ var (
 )
 
 type Answer struct {
-	ID    string
-	Key   string
-	Value string
+	ID    string `json:"id"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type Store interface {
